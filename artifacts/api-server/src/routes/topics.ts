@@ -60,11 +60,36 @@ function attachCitizen(post: any) {
   return { ...post, citizen: citizenPublic };
 }
 
-// GET /api/topics — list all topics
-router.get("/", async (_req, res) => {
+// GET /api/topics — list all topics (with reply counts, sorted by activity)
+router.get("/", async (req, res) => {
   try {
     const allTopics = await db.select().from(topics).orderBy(topics.id);
-    res.json(allTopics);
+
+    // Count replies per topic
+    const replyCounts = await db
+      .select({
+        topicId: posts.topicId,
+        count: sql<number>`count(*)`,
+      })
+      .from(posts)
+      .groupBy(posts.topicId);
+
+    const replyCountMap: Record<number, number> = {};
+    for (const row of replyCounts) {
+      if (row.topicId != null) replyCountMap[row.topicId] = Number(row.count);
+    }
+
+    const sort = req.query.sort as string | undefined;
+    const enriched = allTopics.map((t) => ({
+      ...t,
+      replyCount: replyCountMap[t.id] ?? 0,
+    }));
+
+    if (sort === "trending") {
+      enriched.sort((a, b) => b.replyCount - a.replyCount);
+    }
+
+    res.json(enriched);
   } catch (err) {
     res.status(500).json({ error: "Konular alınamadı" });
   }
