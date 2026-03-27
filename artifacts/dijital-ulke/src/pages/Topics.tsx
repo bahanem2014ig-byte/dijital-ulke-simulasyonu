@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { Layout } from "@/components/layout/Layout";
-import { ArrowRight, Clock } from "lucide-react";
+import { ArrowRight, Clock, TrendingUp, List } from "lucide-react";
 
 interface Topic {
   id: number;
@@ -12,6 +12,7 @@ interface Topic {
   period: string;
   eraSlug: string;
   createdAt: string;
+  replyCount?: number;
 }
 
 const ERA_COLORS: Record<string, string> = {
@@ -39,28 +40,47 @@ const ERA_NAMES: Record<string, string> = {
 export default function Topics() {
   const [topicsData, setTopicsData] = useState<Topic[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [sort, setSort] = useState<"default" | "trending">("default");
   const [, navigate] = useLocation();
 
   useEffect(() => {
-    fetch("/api/topics")
+    setIsLoading(true);
+    const url = sort === "trending" ? "/api/topics?sort=trending" : "/api/topics";
+    fetch(url)
       .then((r) => r.json())
       .then((data) => {
         setTopicsData(data);
         setIsLoading(false);
       })
       .catch(() => setIsLoading(false));
-  }, []);
+  }, [sort]);
 
   return (
     <Layout>
       <div className="max-w-3xl mx-auto px-4 py-8 w-full">
-        <div className="mb-8">
+        <div className="mb-6">
           <h1 className="text-3xl font-display font-bold gold-gradient-text mb-1">
             Tarihin Büyük Konuları
           </h1>
           <p className="text-muted-foreground text-sm">
             Dünyayı değiştiren olaylar — tüm çağların vatandaşları tartışıyor
           </p>
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={() => setSort("default")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${sort === "default" ? "bg-primary text-background border-primary" : "border-white/10 text-muted-foreground hover:border-primary/40 hover:text-white"}`}
+            >
+              <List className="w-3 h-3" />
+              Kronolojik
+            </button>
+            <button
+              onClick={() => setSort("trending")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${sort === "trending" ? "bg-primary text-background border-primary" : "border-white/10 text-muted-foreground hover:border-primary/40 hover:text-white"}`}
+            >
+              <TrendingUp className="w-3 h-3" />
+              Trend
+            </button>
+          </div>
         </div>
 
         {isLoading ? (
