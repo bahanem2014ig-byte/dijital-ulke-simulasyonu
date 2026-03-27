@@ -5,13 +5,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 
 // Lazy load pages for better performance, though static imports are fine too
-import Home from "@/pages/Home";
 import Feed from "@/pages/Feed";
 import Topics from "@/pages/Topics";
 import TopicDetail from "@/pages/TopicDetail";
 import Citizens from "@/pages/Citizens";
 import CitizenDetail from "@/pages/CitizenDetail";
 import Chat from "@/pages/Chat";
+import Nexus from "@/pages/Nexus";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,7 +29,7 @@ function Router() {
       <Route path="/feed" component={Feed} />
       <Route path="/topics" component={Topics} />
       <Route path="/topics/:id" component={TopicDetail} />
-      <Route path="/nexus" component={Home} />
+      <Route path="/nexus" component={Nexus} />
       <Route path="/citizens" component={Citizens} />
       <Route path="/citizens/:id" component={CitizenDetail} />
       <Route path="/chat/:id" component={Chat} />
